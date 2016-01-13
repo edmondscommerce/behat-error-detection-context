@@ -50,12 +50,14 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
                 break;
             }
         }
+
         $dir = __DIR__ . '/../../behat_results/'
             . $tag . '/'
             . gethostname() . '/';
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
+        
         $path = $dir . '_' . $file;
         file_put_contents($path, '');
         $this->logPath = $path;
