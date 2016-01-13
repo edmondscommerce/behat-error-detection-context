@@ -57,7 +57,7 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
-        
+
         $path = $dir . '_' . $file;
         file_put_contents($path, '');
         $this->logPath = $path;
@@ -66,7 +66,7 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
     /**
      * @AfterStep
      * @param AfterStepScope $scope
-     * @throws Exception
+     * @throws \Exception
      * @throws bool
      */
     public function afterStep(AfterStepScope $scope)
@@ -229,6 +229,7 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
                 . var_export($this->scenarioData, true)
                 . "\n\n" . var_export($exception->getMessage(), true);
             file_put_contents($file, $message, FILE_APPEND);
+
             echo "\n\n Error logged to $file\n\n";
             echo "\n( URL ".$this->getSession()->getCurrentUrl().")\n\n";
         }
