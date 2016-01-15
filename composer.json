@@ -17,8 +17,8 @@
     }
   ],
   "minimum-stability": "dev",
-  "require": {
-    "edmondscommerce/behat-framework": "~1.0"
+  "suggest": {
+    "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup"
   },
   "autoload": {
     "psr-4": {
