@@ -15,7 +15,7 @@ class ErrorDetectionContext extends RawMinkContext
 
     private $logPath;
 
-    /**ve   
+    /**
      * @var W3CValidationContext
      */
     protected $_w3c;
