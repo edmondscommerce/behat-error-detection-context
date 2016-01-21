@@ -5,6 +5,7 @@ use \Behat\Behat\Hook\Scope\AfterStepScope;
 use \Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\MinkExtension\Context\RawMinkContext;
 
+
 class ErrorDetectionContext extends RawMinkContext
 {
 
@@ -14,7 +15,7 @@ class ErrorDetectionContext extends RawMinkContext
 
     private $logPath;
 
-    /**
+    /**ve   
      * @var W3CValidationContext
      */
     protected $_w3c;
@@ -34,7 +35,7 @@ class ErrorDetectionContext extends RawMinkContext
             'tags' => $scope->getScenario()->getTags()
         ];
 
-        $this->_w3c = $scope->getEnvironment()->getContext('W3CValidationContext');
+        $this->_w3c = $scope->getEnvironment()->getContext(W3CValidationContext::class);
 
         $this->setLogPath();
     }
@@ -50,10 +51,8 @@ class ErrorDetectionContext extends RawMinkContext
             ) . json_encode($this->scenarioData['tags'])
             . '.txt';
         $tag = 'no-tag';
-        foreach ($GLOBALS['argv'] as $a)
-        {
-            if (false !== strpos($a, '--tags='))
-            {
+        foreach ($GLOBALS['argv'] as $a) {
+            if (false !== strpos($a, '--tags=')) {
                 $tag = str_replace('--tags=', '', $a);
                 break;
             }
@@ -62,8 +61,7 @@ class ErrorDetectionContext extends RawMinkContext
         $dir = __DIR__ . '/../../behat_results/'
             . $tag . '/'
             . gethostname() . '/';
-        if (!is_dir($dir))
-        {
+        if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
 
@@ -81,19 +79,16 @@ class ErrorDetectionContext extends RawMinkContext
     public function afterStep(AfterStepScope $scope)
     {
         $caught = false;
-        try
-        {
+        try {
             $this->checkForExceptionOrFatal();
             $this->lookForJSErrors($scope);
             $this->w3cValidate($this->_w3c);
-        } catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $caught = $e;
         }
         $this->logFailedStep($scope, $caught);
         $this->screenShotFailedSteps($scope, $caught);
-        if ($caught)
-        {
+        if ($caught) {
             throw $caught;
         }
     }
@@ -105,8 +100,7 @@ class ErrorDetectionContext extends RawMinkContext
     public function afterScenario(AfterScenarioScope $scope)
     {
         $this->dieOnFailedScenario($scope);
-        if ($scope->getTestResult()->isPassed())
-        {
+        if ($scope->getTestResult()->isPassed()) {
             unlink($this->logPath);
         }
 
@@ -115,35 +109,28 @@ class ErrorDetectionContext extends RawMinkContext
     protected function checkForExceptionOrFatal()
     {
         $message = '';
-        try
-        {
+        try {
             $html = $this->getSession()->getPage()->getHtml();
 
-            if (false !== strpos($html, '<h1>EXCEPTION: '))
-            {
+            if (false !== strpos($html, '<h1>EXCEPTION: ')) {
                 preg_match('%<h1>EXCEPTION:(.+?)</h1>%s', $html, $matches);
                 $message .= "\n\n  ** Exception Detected **\n\n " . $matches[1] . "\n\n";
             }
-            if (false !== strpos($html, 'Fatal error: '))
-            {
+            if (false !== strpos($html, 'Fatal error: ')) {
                 preg_match('%Fatal error:.+?on line.*?[0-9]+%s', $html, $matches);
                 $message .= "\n\n  ## Fatal Error Detected ##\n\n " . $matches[0] . "\n\n";
             }
-            if (false !== strpos($html, 'Parse error: '))
-            {
+            if (false !== strpos($html, 'Parse error: ')) {
                 preg_match('%Parse error:.+?on line.*?[0-9]+%s', $html, $matches);
                 $message .= "\n\n  ++ Parse error Detected ++\n\n " . $matches[0] . "\n\n";
             }
 
-        } catch (WebDriver\Exception\StaleElementReference $e)
-        {
+        } catch (WebDriver\Exception\StaleElementReference $e) {
             // silence
-        } catch (Exception $e)
-        {
+        } catch (Exception $e) {
             echo "\n" . get_class($e) . ":\n\n" . $e->getMessage() . "\n";
         }
-        if ($message)
-        {
+        if ($message) {
             throw new \Exception($message);
         }
     }
@@ -151,32 +138,25 @@ class ErrorDetectionContext extends RawMinkContext
     protected function w3cValidate(W3CValidationContext $v)
     {
         $current_url = $this->getSession()->getCurrentUrl();
-        if (!$current_url)
-        {
+        if (!$current_url) {
             return;
         }
         $parsed_url = parse_url($current_url);
 
-        if (isset($parsed_url['host']))
-        {
+        if (isset($parsed_url['host'])) {
             $url = $parsed_url['host'] . $parsed_url['path'];
-            if (!isset(self::$checkedUrls[$url]))
-            {
+            if (!isset(self::$checkedUrls[$url])) {
                 $valid = true;
-                try
-                {
+                try {
                     $this->_w3c->iCheckStaticSourceCodeOnW3CValidationService();
                     $this->_w3c->itShouldPass();
-                } catch (\Behat\Mink\Exception\ExpectationException $e)
-                {
+                } catch (\Behat\Mink\Exception\ExpectationException $e) {
                     echo "\n\n ** W3C Errors on URL:\n ** $url\n\n" . $e->getMessage();
                     $valid = false;
-                } catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     echo "\n\n ~~ Exception when validating URL:\n ~~ $url\n\n" . $e->getMessage();
                 }
-                if (false === $valid)
-                {
+                if (false === $valid) {
                     echo "\n\n -- Valid W3C Check for URL:\n -- $url\n\n";
                 }
                 self::$checkedUrls[$url] = true;
@@ -187,16 +167,13 @@ class ErrorDetectionContext extends RawMinkContext
     protected function lookForJSErrors(AfterStepScope $scope)
     {
         $current_url = $this->getSession()->getCurrentUrl();
-        if (!$current_url)
-        {
+        if (!$current_url) {
             return;
         }
         $driver = $this->getMink()->getSession()->getDriver();
-        if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver)
-        {
+        if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver) {
             $html = $this->getSession()->getPage()->getHtml();
-            if (false === strpos($html, 'window.jsErrors'))
-            {
+            if (false === strpos($html, 'window.jsErrors')) {
                 echo "\n\n JS error detection wont work without this JS in place:
 
 <script>
@@ -207,22 +184,17 @@ class ErrorDetectionContext extends RawMinkContext
 </script>
 
                 ";
-            }
-            else
-            {
+            } else {
 
-                try
-                {
+                try {
                     $errors = $driver->evaluateScript("return window.jsErrors");
-                } catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     // output where the error occurred for debugging purposes
                     echo $this->scenarioData;
                     throw $e;
                 }
 
-                if (!$errors || empty($errors))
-                {
+                if (!$errors || empty($errors)) {
                     return;
                 }
 
@@ -234,8 +206,7 @@ class ErrorDetectionContext extends RawMinkContext
                 echo $message . PHP_EOL;
                 echo '-------------------------------------------------------------' . PHP_EOL;
 
-                foreach ($errors as $index => $error)
-                {
+                foreach ($errors as $index => $error) {
                     echo sprintf("   #%d: %s", $index, $error) . PHP_EOL;
                 }
 
@@ -247,14 +218,10 @@ class ErrorDetectionContext extends RawMinkContext
 
     protected function dieOnFailedScenario(AfterScenarioScope $scope)
     {
-        if (99 === $scope->getTestResult()->getResultCode())
-        {
-            if (isset($_SERVER['BEHAT_DIE_ON_FAILURE']))
-            {
+        if (99 === $scope->getTestResult()->getResultCode()) {
+            if (isset($_SERVER['BEHAT_DIE_ON_FAILURE'])) {
                 die("\n\nBEHAT_DIE_ON_FAILURE is defined\n\nKilling Full Process\n\n\n\n");
-            }
-            else
-            {
+            } else {
                 echo "\n\nTo die on failure, please run:\nexport BEHAT_DIE_ON_FAILURE=true;\n\n";
             }
         }
@@ -262,8 +229,7 @@ class ErrorDetectionContext extends RawMinkContext
 
     protected function logFailedStep(AfterStepScope $scope, $caught = false)
     {
-        if (!$scope->getTestResult()->isPassed() || $caught)
-        {
+        if (!$scope->getTestResult()->isPassed() || $caught) {
             $file = $this->logPath;
             $exception = $caught ?: $scope->getTestResult()->getException();
             $message = "\n\n--------------------------------------------\n\n"
@@ -286,11 +252,9 @@ class ErrorDetectionContext extends RawMinkContext
      */
     protected function screenShotFailedSteps(\Behat\Behat\Hook\Scope\AfterStepScope $scope, $caught = false)
     {
-        if (99 === $scope->getTestResult()->getResultCode() || $caught)
-        {
+        if (99 === $scope->getTestResult()->getResultCode() || $caught) {
             $driver = $this->getSession()->getDriver();
-            if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver)
-            {
+            if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver) {
 
                 $name = substr(preg_replace('%[^a-z0-9]%i', '_',
                     array_pop($_SERVER['argv']) . ':' . $scope->getStep()->getText() . '_' . $driver->getCurrentUrl()), 0, 100);
