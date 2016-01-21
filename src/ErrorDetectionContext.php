@@ -3,8 +3,9 @@
 use \Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use \Behat\Behat\Hook\Scope\AfterStepScope;
 use \Behat\Behat\Hook\Scope\AfterScenarioScope;
+use Behat\MinkExtension\Context\RawMinkContext;
 
-class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
+class ErrorDetectionContext extends RawMinkContext
 {
 
     private static $checkedUrls = [];
@@ -12,6 +13,11 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
     private $scenarioData = [];
 
     private $logPath;
+
+    /**
+     * @var W3CValidationContext
+     */
+    protected $_w3c;
 
     /**
      *
@@ -27,6 +33,8 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
             'title' => $scope->getScenario()->getTitle(),
             'tags' => $scope->getScenario()->getTags()
         ];
+
+        $this->_w3c = $scope->getEnvironment()->getContext('W3CValidationContext');
 
         $this->setLogPath();
     }
@@ -77,7 +85,7 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
         {
             $this->checkForExceptionOrFatal();
             $this->lookForJSErrors($scope);
-            $this->w3cValidate($scope->getEnvironment()->getContext('W3CValidationContext'));
+            $this->w3cValidate($this->_w3c);
         } catch (\Exception $e)
         {
             $caught = $e;
@@ -157,8 +165,8 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
                 $valid = true;
                 try
                 {
-                    $v->iCheckStaticSourceCodeOnW3CValidationService();
-                    $v->itShouldPass();
+                    $this->_w3c->iCheckStaticSourceCodeOnW3CValidationService();
+                    $this->_w3c->itShouldPass();
                 } catch (\Behat\Mink\Exception\ExpectationException $e)
                 {
                     echo "\n\n ** W3C Errors on URL:\n ** $url\n\n" . $e->getMessage();
@@ -273,10 +281,10 @@ class ErrorDetectionContext extends Behat\MinkExtension\Context\RawMinkContext
      * And then pause everything
      * Works only with Selenium2Driver.
      *
-     * @param Behat\Behat\Hook\Scope\AfterStepScope $scope
+     * @param \Behat\Behat\Hook\Scope\AfterStepScope $scope
      *
      */
-    protected function screenShotFailedSteps(Behat\Behat\Hook\Scope\AfterStepScope $scope, $caught = false)
+    protected function screenShotFailedSteps(\Behat\Behat\Hook\Scope\AfterStepScope $scope, $caught = false)
     {
         if (99 === $scope->getTestResult()->getResultCode() || $caught)
         {

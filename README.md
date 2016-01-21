@@ -21,5 +21,7 @@ default:
             contexts:
                 - # ...
                 - EdmondsCommerce\BehatErrorDetection\ErrorDetectionContext
+                - EdmondsCommerce\BehatErrorDetection\W3CValidationContext
+                - EdmondsCommerce\BehatErrorDetection\XDebugContext
 
 ```
