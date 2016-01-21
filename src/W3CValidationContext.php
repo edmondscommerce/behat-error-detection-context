@@ -65,23 +65,18 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     public function itShouldPass()
     {
         $msg = '';
-        try
-        {
+        try {
             $this->iShouldSeeNW3CValidationErrors(0);
-        } catch (ExpectationException $e)
-        {
+        } catch (ExpectationException $e) {
             $msg .= "\n\nErrors:\n\n" . $e->getMessage();
         }
 
-        try
-        {
+        try {
             $this->iShouldSeeNW3CValidationWarnings(0);
-        } catch (ExpectationException $e)
-        {
+        } catch (ExpectationException $e) {
             $msg .= "\n\nWarnings:\n\n" . $e->getMessage();
         }
-        if ($msg)
-        {
+        if ($msg) {
             throw new ExpectationException($msg, $this->getSession());
         }
     }
@@ -93,8 +88,7 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     {
         $expectedErrorCount = $this->getNumber($countStr);
         $actualErrorCount = count($this->errors);
-        if ($actualErrorCount != $expectedErrorCount)
-        {
+        if ($actualErrorCount != $expectedErrorCount) {
             throw new ExpectationException("Expected errors: {$expectedErrorCount}. Actual found errors: {$actualErrorCount}." . ($actualErrorCount ? (" Detailed list of errors: \n" . implode("\n---------------------------------------------------------\n", $this->errors)) : ''), $this->getSession());
         }
     }
@@ -106,8 +100,7 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     {
         $expectedWarningCount = $this->getNumber($countStr);
         $actualWarningCount = count($this->warnings);
-        if ($actualWarningCount != $expectedWarningCount)
-        {
+        if ($actualWarningCount != $expectedWarningCount) {
             throw new ExpectationException("Expected warnings: {$expectedWarningCount}. Actual found warnings: {$actualWarningCount}." . ($actualWarningCount ? (" Detailed list of warnings: \n" . implode("\n---------------------------------------------------------\n", $this->warnings)) : ''), $this->getSession());
         }
     }
@@ -130,8 +123,7 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
      */
     protected function getNumber($str)
     {
-        switch (trim($str))
-        {
+        switch (trim($str)) {
             case 'no':
                 $result = 0;
                 break;
@@ -174,38 +166,32 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
         curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
         $response = json_decode(curl_exec($resource), TRUE);
-        if ($response === NULL || !is_array($response))
-        {
+        if ($response === NULL || !is_array($response)) {
             throw new ExpectationException('Could not parse W3C JSON API output', $this->getSession());
         }
-        if (array_key_exists('messages', $response))
-        {
-            foreach ($response['messages'] as $message)
-            {
-                switch ($message['type'])
-                {
+        if (array_key_exists('messages', $response)) {
+            foreach ($response['messages'] as $message) {
+                switch ($message['type']) {
                     case 'info':
-                        if (array_key_exists('subType', $message) && $message['subType'] === 'warning')
-                        {
-                            $this->warnings[] = "
-message: {$message['message']}
-line: {$message['lastLine']}
-column: {$message['lastColumn']}
-extract: {$message['extract']}
-";
+                        if (array_key_exists('subType', $message) && $message['subType'] === 'warning') {
+                            $this->warnings[] = $this->getMessage($message);
                         }
                         break;
                     case 'error':
-                        $this->errors[] = "
-message: {$message['message']}
-line: {$message['lastLine']}
-column: {$message['lastColumn']}
-extract: {$message['extract']}
-";
+                        $this->errors[] = $this->getMessage($message);
                         break;
                     default:
                 }
             }
         }
+    }
+
+    protected function getMessage(array $message)
+    {
+        $return = '';
+        foreach ($message as $k => $v) {
+            $return .= "\n$k: $v";
+        }
+        return "\n$return\n";
     }
 }
