@@ -9,9 +9,14 @@ use Behat\MinkExtension\Context\RawMinkContext;
 use \Guzzle\Http\Exception\CurlException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Testwork\Hook\Scope\BeforeSuiteScope;
 
 class W3CValidationContext extends RawMinkContext implements Context, SnippetAcceptingContext
 {
+
+    const MATCH_MODE_EQUALS = "equals";
+    const MATCH_MODE_LESSTHAN = "lessthan";
+
     /**
      * @var string
      */
@@ -24,6 +29,27 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
      * @var array;
      */
     protected $errors;
+
+    protected static $_w3cValidationSettings = [];
+
+    /** @BeforeSuite
+     * @param BeforeSuiteScope $scope
+     *
+     * @throws \Exception
+     */
+    public static function loadErrorDetectionConfiguration(BeforeSuiteScope $scope)
+    {
+        $environment = $scope->getEnvironment();
+        if (!$environment->getSuite()->hasSetting('parameters')) {
+            throw new \Exception('You must set the parameters scetion of the behat.yml');
+        }
+        $parameters = $environment->getSuite()->getSetting('parameters');
+        if (!isset($parameters['w3cValidationSettings'])) {
+            throw new \Exception('You must include the errorDetectionSettings in the behat.yml file');
+        }
+        $w3cValidationSettings = $parameters['w3cValidationSettings'];
+        self::$_w3cValidationSettings = $w3cValidationSettings;
+    }
 
     /**
      * @When /^I check source code on W3C validation service$/
@@ -65,14 +91,17 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     public function itShouldPass()
     {
         $msg = '';
+
+        $threshold = self::$_w3cValidationSettings['errorThreshold'];
+
         try {
-            $this->iShouldSeeNW3CValidationErrors(0);
+            $this->iShouldSeeNW3CValidationErrors($threshold, self::MATCH_MODE_LESSTHAN);
         } catch (ExpectationException $e) {
             $msg .= "\n\nErrors:\n\n" . $e->getMessage();
         }
 
         try {
-            $this->iShouldSeeNW3CValidationWarnings(0);
+            $this->iShouldSeeNW3CValidationWarnings($threshold, self::MATCH_MODE_LESSTHAN);
         } catch (ExpectationException $e) {
             $msg .= "\n\nWarnings:\n\n" . $e->getMessage();
         }
@@ -84,11 +113,19 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     /**
      * @Then /^I should see (.*) W3C validation errors$/
      */
-    public function iShouldSeeNW3CValidationErrors($countStr)
+    public function iShouldSeeNW3CValidationErrors($countStr, $matchMode = self::MATCH_MODE_EQUALS)
     {
         $expectedErrorCount = $this->getNumber($countStr);
         $actualErrorCount = count($this->errors);
-        if ($actualErrorCount != $expectedErrorCount) {
+
+        if($matchMode == self::MATCH_MODE_EQUALS) {
+            $truth = $actualErrorCount == $expectedErrorCount;
+        }
+        elseif($matchMode == self::MATCH_MODE_LESSTHAN) {
+            $truth = $actualErrorCount < $expectedErrorCount;
+        }
+
+        if (!$truth) {
             throw new ExpectationException("Expected errors: {$expectedErrorCount}. Actual found errors: {$actualErrorCount}." . ($actualErrorCount ? (" Detailed list of errors: \n" . implode("\n---------------------------------------------------------\n", $this->errors)) : ''), $this->getSession());
         }
     }
@@ -96,11 +133,19 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     /**
      * @Given /^I should see (.*) W3C validation warnings$/
      */
-    public function iShouldSeeNW3CValidationWarnings($countStr)
+    public function iShouldSeeNW3CValidationWarnings($countStr, $matchMode = self::MATCH_MODE_EQUALS)
     {
         $expectedWarningCount = $this->getNumber($countStr);
         $actualWarningCount = count($this->warnings);
-        if ($actualWarningCount != $expectedWarningCount) {
+
+        if($matchMode == self::MATCH_MODE_EQUALS) {
+            $truth = $actualWarningCount != $expectedWarningCount;
+        }
+        elseif($matchMode == self::MATCH_MODE_LESSTHAN) {
+            $truth = $actualWarningCount < $expectedWarningCount;
+        }
+
+        if (!$truth) {
             throw new ExpectationException("Expected warnings: {$expectedWarningCount}. Actual found warnings: {$actualWarningCount}." . ($actualWarningCount ? (" Detailed list of warnings: \n" . implode("\n---------------------------------------------------------\n", $this->warnings)) : ''), $this->getSession());
         }
     }
