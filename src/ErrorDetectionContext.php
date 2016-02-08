@@ -79,6 +79,9 @@ class ErrorDetectionContext extends RawMinkContext
     public function afterStep(AfterStepScope $scope)
     {
         $caught = false;
+        if($this->getMink()->isSessionStarted() === false) {
+            return;
+        }
         try {
             $this->checkForExceptionOrFatal();
             $this->lookForJSErrors($scope);
