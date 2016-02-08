@@ -23,5 +23,8 @@ default:
                 - EdmondsCommerce\BehatErrorDetection\ErrorDetectionContext
                 - EdmondsCommerce\BehatErrorDetection\W3CValidationContext
                 - EdmondsCommerce\BehatErrorDetection\XDebugContext
+            parameters:
+                w3cValidationSettings:
+                    errorThreshold: 0
 
 ```
