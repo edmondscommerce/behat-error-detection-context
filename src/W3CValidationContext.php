@@ -41,9 +41,10 @@ class W3CValidationContext extends RawMinkContext implements Context, SnippetAcc
     {
         $environment = $scope->getEnvironment();
         if (!$environment->getSuite()->hasSetting('parameters')) {
-            throw new \Exception('You must set the parameters scetion of the behat.yml');
+            $parameters['w3cValidationSettings']['errorThreshold'] = 0;
+        } else {
+            $parameters = $environment->getSuite()->getSetting('parameters');
         }
-        $parameters = $environment->getSuite()->getSetting('parameters');
         if (!isset($parameters['w3cValidationSettings'])) {
             throw new \Exception('You must include the errorDetectionSettings in the behat.yml file');
         }
