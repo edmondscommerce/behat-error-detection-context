@@ -29,10 +29,10 @@ class ErrorDetectionContext extends RawMinkContext
     public function beforeScenario(BeforeScenarioScope $scope)
     {
         $this->scenarioData = [
-            'file' => $scope->getFeature()->getFile(),
-            'line' => $scope->getScenario()->getLine(),
+            'file'  => $scope->getFeature()->getFile(),
+            'line'  => $scope->getScenario()->getLine(),
             'title' => $scope->getScenario()->getTitle(),
-            'tags' => $scope->getScenario()->getTags()
+            'tags'  => $scope->getScenario()->getTags()
         ];
 
         $this->_w3c = $scope->getEnvironment()->getContext(W3CValidationContext::class);
@@ -50,7 +50,7 @@ class ErrorDetectionContext extends RawMinkContext
                 $this->scenarioData['title']
             ) . json_encode($this->scenarioData['tags'])
             . '.txt';
-        $tag = 'no-tag';
+        $tag  = 'no-tag';
         foreach ($GLOBALS['argv'] as $a) {
             if (false !== strpos($a, '--tags=')) {
                 $tag = str_replace('--tags=', '', $a);
@@ -72,14 +72,23 @@ class ErrorDetectionContext extends RawMinkContext
 
     /**
      * @AfterStep
+     *
      * @param AfterStepScope $scope
+     *
      * @throws \Exception
      * @throws bool
      */
     public function afterStep(AfterStepScope $scope)
     {
         $caught = false;
-        if($this->getMink()->isSessionStarted() === false) {
+        // Don't run the checks if the session has not started
+        if ($this->getMink()->isSessionStarted() === false) {
+            return;
+        }
+        $baseUrl    = $this->getMinkParameter('base_url');
+        $currentUrl = $this->getSession()->getCurrentUrl();
+        // Don't run the checks if we are on an external domain
+        if(strpos($currentUrl, $baseUrl) === false) {
             return;
         }
         try {
@@ -98,6 +107,7 @@ class ErrorDetectionContext extends RawMinkContext
 
     /**
      * @AfterScenario
+     *
      * @param AfterScenarioScope $scope
      */
     public function afterScenario(AfterScenarioScope $scope)
@@ -201,7 +211,7 @@ class ErrorDetectionContext extends RawMinkContext
                     return;
                 }
 
-                $file = sprintf("%s:%d", $scope->getFeature()->getFile(), $scope->getStep()->getLine());
+                $file    = sprintf("%s:%d", $scope->getFeature()->getFile(), $scope->getStep()->getLine());
                 $message = sprintf("Found %d javascript error%s", count($errors), count($errors) > 0 ? 's' : '');
 
                 echo '-------------------------------------------------------------' . PHP_EOL;
@@ -233,9 +243,9 @@ class ErrorDetectionContext extends RawMinkContext
     protected function logFailedStep(AfterStepScope $scope, $caught = false)
     {
         if (!$scope->getTestResult()->isPassed() || $caught) {
-            $file = $this->logPath;
+            $file      = $this->logPath;
             $exception = $caught ?: $scope->getTestResult()->getException();
-            $message = "\n\n--------------------------------------------\n\n"
+            $message   = "\n\n--------------------------------------------\n\n"
                 . var_export($this->scenarioData, true)
                 . "\n\n" . var_export($exception->getMessage(), true);
             file_put_contents($file, $message, FILE_APPEND);
@@ -259,8 +269,12 @@ class ErrorDetectionContext extends RawMinkContext
             $driver = $this->getSession()->getDriver();
             if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver) {
 
-                $name = substr(preg_replace('%[^a-z0-9]%i', '_',
-                    array_pop($_SERVER['argv']) . ':' . $scope->getStep()->getText() . '_' . $driver->getCurrentUrl()), 0, 100);
+                $name = substr(preg_replace('%[^a-z0-9]%i',
+                                            '_',
+                                            array_pop($_SERVER['argv']) . ':' . $scope->getStep()->getText() . '_'
+                                            . $driver->getCurrentUrl()),
+                               0,
+                               100);
                 $file = '/tmp/behat_' . $name . '.png';
                 file_put_contents($file, $this->getSession()->getDriver()->getScreenshot());
                 echo "\n( Error Screen Shot Saved to $file)\n\n";
