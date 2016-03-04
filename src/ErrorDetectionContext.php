@@ -21,6 +21,11 @@ class ErrorDetectionContext extends RawMinkContext
     protected $_w3c;
 
     /**
+     * @var 
+     */
+    protected $_screenshot;
+
+    /**
      *
      * @BeforeScenario
      *
@@ -36,6 +41,8 @@ class ErrorDetectionContext extends RawMinkContext
         ];
 
         $this->_w3c = $scope->getEnvironment()->getContext(W3CValidationContext::class);
+        //$this->_screenshot = $scope->getEnvironment()->getContext(::class);
+        
 
         $this->setLogPath();
     }
