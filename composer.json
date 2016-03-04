@@ -9,7 +9,7 @@
     "Html Errors"
   ],
   "require": {
-    "edmondscommerce/behat-screenshot-context": "dev-master",
+    "edmondscommerce/behat-screenshot-context": "dev-master"
   },
   "homepage": "https://www.edmondscommerce.co.uk",
   "license": "MIT",
