@@ -4,6 +4,7 @@ use \Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use \Behat\Behat\Hook\Scope\AfterStepScope;
 use \Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\MinkExtension\Context\RawMinkContext;
+use EdmondsCommerce\BehatScreenshotContext\ScreenshotContext;
 
 
 class ErrorDetectionContext extends RawMinkContext
@@ -21,7 +22,7 @@ class ErrorDetectionContext extends RawMinkContext
     protected $_w3c;
 
     /**
-     * @var 
+     * @var ScreenshotContext
      */
     protected $_screenshot;
 
@@ -41,9 +42,8 @@ class ErrorDetectionContext extends RawMinkContext
         ];
 
         $this->_w3c = $scope->getEnvironment()->getContext(W3CValidationContext::class);
-        //$this->_screenshot = $scope->getEnvironment()->getContext(::class);
+        $this->_screenshot = $scope->getEnvironment()->getContext(ScreenshotContext::class);
         
-
         $this->setLogPath();
     }
 

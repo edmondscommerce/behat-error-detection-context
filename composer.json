@@ -8,9 +8,6 @@
     "Browser Testing",
     "Html Errors"
   ],
-  "require": {
-    "edmondscommerce/behat-screenshot-context": "dev-master"
-  },
   "homepage": "https://www.edmondscommerce.co.uk",
   "license": "MIT",
   "authors": [
@@ -21,7 +18,8 @@
   ],
   "minimum-stability": "dev",
   "suggest": {
-    "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup"
+    "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup",
+     "edmondscommerce/behat-screenshot-context": "dev-master"
   },
   "autoload": {
     "psr-4": {
