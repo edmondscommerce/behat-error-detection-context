@@ -22,7 +22,7 @@
   },
   "require": {
      "edmondscommerce/behat-screenshot-context": "dev-master"
-  }
+  },
   "autoload": {
     "psr-4": {
       "EdmondsCommerce\\BehatErrorDetection\\": "src/"
