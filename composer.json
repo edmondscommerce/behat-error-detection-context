@@ -18,9 +18,11 @@
   ],
   "minimum-stability": "dev",
   "suggest": {
-    "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup",
-     "edmondscommerce/behat-screenshot-context": "dev-master"
+    "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup"
   },
+  "require": {
+     "edmondscommerce/behat-screenshot-context": "dev-master"
+  }
   "autoload": {
     "psr-4": {
       "EdmondsCommerce\\BehatErrorDetection\\": "src/"
