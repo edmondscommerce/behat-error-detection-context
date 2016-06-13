@@ -21,7 +21,7 @@
     "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup"
   },
   "require": {
-     "edmondscommerce/behat-screenshot-context": "dev-master"
+     "edmondscommerce/behat-screenshot-context": "dev-master@dev"
   },
   "autoload": {
     "psr-4": {
