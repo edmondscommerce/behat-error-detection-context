@@ -1,4 +1,4 @@
-#Behat Error Detection Context
+# Behat Error Detection Context
 ## By [Edmonds Commerce](https://www.edmondscommerce.co.uk)
 
 A simple Behat Context to allow you to use detect errors from the web browser including PHP exception messages
