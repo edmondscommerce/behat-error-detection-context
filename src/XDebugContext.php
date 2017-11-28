@@ -14,7 +14,10 @@ class XDebugContext extends RawMinkContext
      */
     public function iXdebugBreak()
     {
-        xdebug_break();
+        if(function_exists('xdebug_break'))
+        {
+            xdebug_break();
+        }
     }
 
 
