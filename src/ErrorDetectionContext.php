@@ -274,7 +274,7 @@ class ErrorDetectionContext extends RawMinkContext
     {
         if (99 === $scope->getTestResult()->getResultCode() || $caught) {
             $driver = $this->getSession()->getDriver();
-            if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver) {
+            if ($driver instanceof \Behat\Mink\Driver\Selenium2Driver || $driver instanceof \DMore\ChromeDriver\ChromeDriver) {
 
                 $name = substr(preg_replace('%[^a-z0-9]%i',
                                             '_',
