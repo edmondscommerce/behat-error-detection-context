@@ -16,7 +16,6 @@
       "email": "info@edmondscommerce.co.uk"
     }
   ],
-  "minimum-stability": "dev",
   "suggest": {
     "edmondscommerce/behat-framework": "Parent framework, allows easier behat setup"
   },
